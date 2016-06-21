@@ -5,7 +5,7 @@ package com.lcns.lemotree.newtest.model;
  */
 
 public class Course {
-    private int id;//主鍵，自增
+    private Integer id;//主鍵，自增
     private int startYear;//学年开始年
     private int endYear;//学年结束年
     private int semester;//学期

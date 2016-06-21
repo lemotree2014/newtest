@@ -1,13 +1,22 @@
 package com.lcns.lemotree.newtest.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.lcns.lemotree.newtest.R;
 import com.lcns.lemotree.newtest.model.Course;
 import com.lcns.lemotree.newtest.service.CourseService;
 import com.lcns.lemotree.newtest.util.CommonUtil;
+
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -17,6 +26,8 @@ import java.util.List;
  */
 
 public class CourseActivity extends Activity {
+    private static Context mContext;
+
     //课程页面的button引用，6行7列
     private int[][] lessons = {
             {R.id.lesson11, R.id.lesson12, R.id.lesson13, R.id.lesson14, R.id.lesson15, R.id.lesson16, R.id.lesson17},
@@ -34,6 +45,7 @@ public class CourseActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course);
+        mContext = getApplicationContext();
         initValue();
         initView();
     }
@@ -59,6 +71,20 @@ public class CourseActivity extends Activity {
         //课程可能有1节课的，2节课的，3节课的，因此这里应该改成在自定义View上显示更合理
         List<Course> courses;//获得数据库中的课程
         Course course = null;
+        RequestQueue mQueue = Volley.newRequestQueue(mContext);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest("http://192.168.3.104:8080/test/index.do", null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("TAG", response.toString());
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("TAGerr", error.getMessage(), error);
+            }
+        });
+        mQueue.add(jsonObjectRequest);
 
         for (int i = 0; i < 10; i++) {
             //course=courses.get(i);//拿到当前课程
