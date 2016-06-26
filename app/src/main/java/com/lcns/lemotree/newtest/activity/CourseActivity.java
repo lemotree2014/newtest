@@ -6,19 +6,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.lcns.lemotree.newtest.R;
 import com.lcns.lemotree.newtest.model.Course;
 import com.lcns.lemotree.newtest.service.CourseService;
 import com.lcns.lemotree.newtest.util.CommonUtil;
+import com.squareup.okhttp.Call;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
-import org.json.JSONObject;
-
-import java.util.List;
+import java.io.IOException;
 
 /**
  * Created by Lemotree on 2016/6/20.
@@ -69,22 +67,88 @@ public class CourseActivity extends Activity {
         //这里有逻辑问题，只是简单的显示了下数据，数据并不一定是显示在正确位置
         //课程可能有重叠
         //课程可能有1节课的，2节课的，3节课的，因此这里应该改成在自定义View上显示更合理
-        List<Course> courses;//获得数据库中的课程
+        //List<Course> courses;//获得数据库中的课程
         Course course = null;
-        RequestQueue mQueue = Volley.newRequestQueue(mContext);
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest("http://192.168.3.104:8080/test/index.do", null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.d("TAG", response.toString());
-                    }
-                }, new Response.ErrorListener() {
+//        RequestQueue mQueue = Volley.newRequestQueue(mContext);
+//        GsonRequest<Course> gsonRequest = new GsonRequest<Course>(
+//                "http://192.168.3.104:8080/test/index.do", Course.class,
+//                new Response.Listener<Course>() {
+//                    @Override
+//                    public void onResponse(Course course) {
+//                        //Course course = courseinfo.getCourse();
+//                        Log.d("TAG", "Name is " + course);
+//                        Log.d("TAG", "teacher is " + course.getTeacher());
+//                        Log.d("TAG", "dayofweek is " + course.getDayOfWeek());
+//                    }
+//                }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Log.e("TAG", error.getMessage(), error);
+//            }
+//        });
+//        mQueue.add(gsonRequest);
+
+//创建okHttpClient对象
+        OkHttpClient mOkHttpClient = new OkHttpClient();
+//创建一个Request
+        final Request request = new Request.Builder()
+                .url("https://github.com/hongyangAndroid")
+                .build();
+//new call
+        Call call = mOkHttpClient.newCall(request);
+//请求加入调度
+        call.enqueue(new Callback() {
             @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e("TAGerr", error.getMessage(), error);
+            public void onFailure(Request request, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                String htmlStr =  response.body().string();
+                Log.d("TAG111", "Name is " + htmlStr);
+
             }
         });
-        mQueue.add(jsonObjectRequest);
+
+
+//        GsonRequest<Courseinfo> gsonRequest = new GsonRequest<Courseinfo>(
+//                "http://192.168.3.104:8080/test/index.do", Courseinfo.class,
+//                new Response.Listener<Courseinfo>() {
+//                    @Override
+//                    public void onResponse(Courseinfo courseinfo) {
+//                        List<Course> course = courseinfo.getCourses();
+//                        Log.d("TAG", "courseinfo is " + courseinfo.toString()+"num"+course.size() );
+//                        for (int i = 0; i < course.size(); i++) {
+//
+//                            Log.d("TAG", "Name is " + course.get(i).getCourseName());
+//                        }
+//
+//                        //Log.d("TAG", "teacher is " + course.getTeacher());
+//                        //Log.d("TAG", "dayofweek is " + course.getDayOfWeek());
+//                    }
+//                }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Log.e("TAG", error.getMessage(), error);
+//            }
+//        });
+//        mQueue.add(gsonRequest);
+
+
+//        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest("http://192.168.3.104:8080/test/index.do", null,
+//                new Response.Listener<JSONObject>() {
+//                    @Override
+//                    public void onResponse(JSONObject response) {
+//                        Log.d("TAG", response.toString());
+//                    }
+//                }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Log.e("TAG", error.getMessage(), error);
+//            }
+//        });
+//        mQueue.add(jsonObjectRequest);
 
         for (int i = 0; i < 10; i++) {
             //course=courses.get(i);//拿到当前课程
