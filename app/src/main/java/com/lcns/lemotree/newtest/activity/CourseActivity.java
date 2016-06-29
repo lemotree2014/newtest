@@ -6,17 +6,23 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
 import com.lcns.lemotree.newtest.R;
 import com.lcns.lemotree.newtest.model.Course;
+import com.lcns.lemotree.newtest.model.Courseinfo;
 import com.lcns.lemotree.newtest.service.CourseService;
 import com.lcns.lemotree.newtest.util.CommonUtil;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+import com.lcns.lemotree.newtest.util.GsonRequest;
 
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Lemotree on 2016/6/20.
@@ -25,6 +31,9 @@ import java.io.IOException;
 
 public class CourseActivity extends Activity {
     private static Context mContext;
+    private final Gson gson = new Gson();
+    List<Courseinfo> courseinfo;
+
 
     //课程页面的button引用，6行7列
     private int[][] lessons = {
@@ -46,6 +55,7 @@ public class CourseActivity extends Activity {
         mContext = getApplicationContext();
         initValue();
         initView();
+
     }
 
     @Override
@@ -58,6 +68,7 @@ public class CourseActivity extends Activity {
      */
     private void initValue() {
         //courseService= CourseService.getCourseService();
+
     }
 
     /**
@@ -68,96 +79,41 @@ public class CourseActivity extends Activity {
         //课程可能有重叠
         //课程可能有1节课的，2节课的，3节课的，因此这里应该改成在自定义View上显示更合理
         //List<Course> courses;//获得数据库中的课程
-        Course course = null;
-//        RequestQueue mQueue = Volley.newRequestQueue(mContext);
-//        GsonRequest<Course> gsonRequest = new GsonRequest<Course>(
-//                "http://192.168.3.104:8080/test/index.do", Course.class,
-//                new Response.Listener<Course>() {
-//                    @Override
-//                    public void onResponse(Course course) {
-//                        //Course course = courseinfo.getCourse();
-//                        Log.d("TAG", "Name is " + course);
-//                        Log.d("TAG", "teacher is " + course.getTeacher());
-//                        Log.d("TAG", "dayofweek is " + course.getDayOfWeek());
-//                    }
-//                }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                Log.e("TAG", error.getMessage(), error);
-//            }
-//        });
-//        mQueue.add(gsonRequest);
+       Courseinfo course1 = null;
 
-//创建okHttpClient对象
-        OkHttpClient mOkHttpClient = new OkHttpClient();
-//创建一个Request
-        final Request request = new Request.Builder()
-                .url("https://github.com/hongyangAndroid")
-                .build();
-//new call
-        Call call = mOkHttpClient.newCall(request);
-//请求加入调度
-        call.enqueue(new Callback() {
+
+        RequestQueue mQueue = Volley.newRequestQueue(mContext);
+        GsonRequest<Course> gsonRequest = new GsonRequest<Course>(Request.Method.POST,
+                "http://192.168.3.111:8080/test/index.do", Course.class,
+                new Response.Listener<Course>() {
+                    @Override
+                    public void onResponse(Course course) {
+                        courseinfo = course.getCourse();
+                        Log.d("TAG", "Name is " + courseinfo.get(0).getCourseName());
+                    }
+                }, new Response.ErrorListener() {
             @Override
-            public void onFailure(Request request, IOException e) {
-
+            public void onErrorResponse(VolleyError error) {
+                Log.e("TAG", error.getMessage(), error);
             }
-
+        }){
             @Override
-            public void onResponse(Response response) throws IOException {
-                String htmlStr =  response.body().string();
-                Log.d("TAG111", "Name is " + htmlStr);
-
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> hashMap=new HashMap<String,String>();
+                hashMap.put("a","123");
+                return hashMap;
             }
-        });
+        };
+        mQueue.add(gsonRequest);
 
-
-//        GsonRequest<Courseinfo> gsonRequest = new GsonRequest<Courseinfo>(
-//                "http://192.168.3.104:8080/test/index.do", Courseinfo.class,
-//                new Response.Listener<Courseinfo>() {
-//                    @Override
-//                    public void onResponse(Courseinfo courseinfo) {
-//                        List<Course> course = courseinfo.getCourses();
-//                        Log.d("TAG", "courseinfo is " + courseinfo.toString()+"num"+course.size() );
-//                        for (int i = 0; i < course.size(); i++) {
-//
-//                            Log.d("TAG", "Name is " + course.get(i).getCourseName());
-//                        }
-//
-//                        //Log.d("TAG", "teacher is " + course.getTeacher());
-//                        //Log.d("TAG", "dayofweek is " + course.getDayOfWeek());
-//                    }
-//                }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                Log.e("TAG", error.getMessage(), error);
-//            }
-//        });
-//        mQueue.add(gsonRequest);
-
-
-//        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest("http://192.168.3.104:8080/test/index.do", null,
-//                new Response.Listener<JSONObject>() {
-//                    @Override
-//                    public void onResponse(JSONObject response) {
-//                        Log.d("TAG", response.toString());
-//                    }
-//                }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                Log.e("TAG", error.getMessage(), error);
-//            }
-//        });
-//        mQueue.add(jsonObjectRequest);
-
-        for (int i = 0; i < 10; i++) {
-            //course=courses.get(i);//拿到当前课程
-            //int dayOfWeek = course.getDayOfWeek()-1;//转换为lessons数组对应的下标
-            //int section=course.getStartSection()/2;//转换为lessons数组对应的下标
-            Button lesson = (Button) findViewById(lessons[1][2]);//获得该节课的button
+        for (int i = 0; i < courseinfo.size(); i++) {
+            course1=courseinfo.get(i);//拿到当前课程
+            int dayOfWeek = course1.getDayOfWeek()-1;//转换为lessons数组对应的下标
+            int section=course1.getStartSection()/2;//转换为lessons数组对应的下标
+            Button lesson = (Button) findViewById(lessons[dayOfWeek][section]);//获得该节课的button
             int bgRes = bg[CommonUtil.getRandom(bg.length - 1)];//随机获取背景色
             lesson.setBackgroundResource(bgRes);//设置背景
-            lesson.setText("语文@一班");//设置文本为课程名+“@”+教室
+            lesson.setText(course1.getCourseName());//设置文本为课程名+“@”+教室
         }
     }
 }
